@@ -27,7 +27,7 @@ std::string Prepare::run(const std::string filename)
     while(infile.get(ch)) {
       if(ch == '<' && infile.peek() == '%') {
         can_write_html = false;
-        htmlfile << "<!--CLASPFMT(" << uuid << ")-->";
+        htmlfile << "CLASPFMT(" << uuid << ")";
         claffile << "\nSTARTX: {" << uuid << "}\n";
       }
 
@@ -52,7 +52,7 @@ std::string Prepare::run(const std::string filename)
 
     // run prettier
     std::ostringstream cmd;
-    cmd << "cd $(dirname \"" << filename << "\") && prettier $(basename \"" << filename << ".html\") --write --print-width 80";
+    cmd << "cd $(dirname \"" << filename << "\") && prettier $(basename \"" << filename << ".html\") --write --print-width 250 --no-bracket-spacing --html-whitespace-sensitivity ignore";
     if(system(cmd.str().c_str()) != 0) {
       return NULL;
     }
