@@ -1,24 +1,65 @@
+#include <cstddef>
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <stdio.h>
+#include <string.h>
 #include "prepare.h"
+#include "uuid.h"
 
 /**
 * Prepare the file for prettier formatting
-* 1) Remove <%.*%> tags and replace with TAGIDs
-* 2) Write ASP code to filename TAGID.claf
-* 3) Rename file to {name}.html
+* Remove <%.*%> tags and replace with <!-- {uuid} -->
+* Write ASP code to filename.claf
+* Write HTML code to filename.html
 */
-void Prepare::run(char* file) const
+std::string Prepare::run(const std::string filename)
 {
-  std::cout << file << std::endl;
-  std::ifstream f(file);
+  std::ifstream infile(filename);
+  std::ofstream htmlfile(filename + ".html");
+  std::ofstream claffile(filename + ".claf");
 
-  if(!f.is_open()) {
+  if(infile.is_open()) {
+    char ch;
+    char last_ch;
+    bool can_write_html = true;
+    std::string uuid = UUID::generate();
+    while(infile.get(ch)) {
+      if(ch == '<' && infile.peek() == '%') {
+        can_write_html = false;
+        htmlfile << "<!--CLASPFMT(" << uuid << ")-->";
+        claffile << "\nSTARTX: {" << uuid << "}\n";
+      }
+
+      if(can_write_html) {
+        htmlfile << ch;
+      } else {
+        claffile << ch;
+      }
+
+      if(ch == '>' && last_ch == '%') {
+        can_write_html = true;
+        claffile << "\nEND: {" << uuid << "}\n";
+        // generate a new uuid
+        uuid = UUID::generate();
+      }
+
+      last_ch = ch;
+    }
+    infile.close();
+    htmlfile.close();
+    claffile.close();
+
+    // run prettier
+    std::ostringstream cmd;
+    cmd << "cd $(dirname \"" << filename << "\") && prettier $(basename \"" << filename << ".html\") --write --print-width 80";
+    if(system(cmd.str().c_str()) != 0) {
+      return NULL;
+    }
+  } else {
     std::cerr << "Error opening file";
+    return NULL;
   }
 
-  std::string s;
-  while(std::getline(f, s)) {
-    std::cout << s << std::endl;
-  }
+  return filename;
 }

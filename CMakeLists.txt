@@ -5,4 +5,4 @@ project (claspfmt
   DESCRIPTION "Classic Asp Formatter"
   LANGUAGES CXX
 )
-add_executable(claspfmt src/main.cpp src/prepare.cpp src/format.cpp)
+add_executable(claspfmt src/main.cpp src/prepare.cpp src/format.cpp src/uuid.cpp)
