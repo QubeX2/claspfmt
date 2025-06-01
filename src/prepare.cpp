@@ -1,9 +1,10 @@
 #include <cstddef>
 #include <iostream>
 #include <fstream>
+#include <optional>
 #include <sstream>
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include "prepare.h"
 #include "uuid.h"
 
@@ -13,7 +14,7 @@
 * Write ASP code to filename.claf
 * Write HTML code to filename.html
 */
-std::string Prepare::run(const std::string filename)
+std::string Prepare::run(const std::string& filename)
 {
   std::ifstream infile(filename);
   std::ofstream htmlfile(filename + ".html");
@@ -28,7 +29,7 @@ std::string Prepare::run(const std::string filename)
       if(ch == '<' && infile.peek() == '%') {
         can_write_html = false;
         htmlfile << "CLASPFMT(" << uuid << ")";
-        claffile << "\nSTARTX: {" << uuid << "}\n";
+        claffile << "\nSTART: {" << uuid << "}\n";
       }
 
       if(can_write_html) {
@@ -54,12 +55,12 @@ std::string Prepare::run(const std::string filename)
     std::ostringstream cmd;
     cmd << "cd $(dirname \"" << filename << "\") && prettier $(basename \"" << filename << ".html\") --write --print-width 250 --no-bracket-spacing --html-whitespace-sensitivity ignore";
     if(system(cmd.str().c_str()) != 0) {
-      return NULL;
+      return "";
     }
   } else {
     std::cerr << "Error opening file";
-    return NULL;
+    return "";
   }
 
-  return filename;
+  return filename.data();
 }
