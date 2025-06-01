@@ -4,24 +4,32 @@
 #include <string>
 #include <vector>
 
-enum class TokenType { Symbol = 1, WhiteSpace };
+enum class TokenType { KeyWord = 1, WhiteSpace };
 
 class Token {
 public:
+  Token(std::string s, TokenType t) {
+    this->item = s;
+    this->type = t;
+  }
   TokenType type;
   std::string item;
-
 };
 
 class Part {
 public:
+  Part() {};
+  Part(std::string id) {
+    this->id = id;
+  }
+  std::string id;
   std::vector<class Token> tokens;
 };
 
 class Tokenizer {
 private:
 public:
-  static void parse(const std::string& filename);
+  static std::vector<Part> parse(const std::string& filename);
 };
 
 #endif
