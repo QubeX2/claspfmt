@@ -3,6 +3,8 @@
 #include <regex>
 #include <vector>
 #include "tokenizer.h"
+#include "format.h"
+#include "helpers.h"
 
 
 std::vector<Part> Tokenizer::parse(const std::string& filename)
@@ -23,10 +25,7 @@ std::vector<Part> Tokenizer::parse(const std::string& filename)
       }
 
       if(do_parse) {
-        // trim
-        line.erase(0, line.find_first_not_of(" \r\n\t"));
-        line.erase(line.find_last_not_of(" \r\n\t") + 1);
-        // end trim
+        StringHelper::trim(line, " \r\n\t");
 
         char* token = std::strtok(line.data(), delimiters);
         while(token) {

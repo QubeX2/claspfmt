@@ -22,8 +22,9 @@ public:
 class Format {
 public:
   static std::vector<Section> apply(const std::vector<Part>& list);
+  static std::string& trim(std::string& str);
   static std::string keywords(std::string source);
-  static void indentation(std::string& source, int& indent);
+  static void indentation(std::string source, int& indent);
 };
 
 #endif
