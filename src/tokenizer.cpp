@@ -2,6 +2,7 @@
 #include <fstream>
 #include <regex>
 #include <vector>
+#include <iostream>
 #include "tokenizer.h"
 #include "format.h"
 #include "helpers.h"

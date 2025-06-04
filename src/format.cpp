@@ -1,8 +1,10 @@
 #include <algorithm>
 #include <cctype>
+#include <cstdint>
 #include <iterator>
 #include <iostream>
 #include <regex>
+#include <sys/types.h>
 #include <vector>
 #include <cctype>
 #include <algorithm>
@@ -25,10 +27,11 @@ std::string Format::keywords(std::string source)
   return source;
 }
 
-void Format::indentation(std::string source, size_t& indent, bool& iskeyword)
+void Format::indentation(std::string source, size_t& indent, bool& iskeyword, uint8_t& type)
 {
   StringHelper::trim(source, " <%>");
   iskeyword = false;
+  type = 0;
 
   if(source.starts_with("'")) {
     return;
@@ -65,6 +68,7 @@ void Format::indentation(std::string source, size_t& indent, bool& iskeyword)
   for(auto pattern: keyword_patterns) {
     if(std::regex_search(source, std::regex(pattern))) {
       iskeyword = true;
+      type = 3;
       return;
     }
   }
@@ -75,6 +79,7 @@ void Format::indentation(std::string source, size_t& indent, bool& iskeyword)
     if(std::regex_search(source, std::regex(pattern))) {
       indent++;
       iskeyword = true;
+      type = 1;
       return;
     }
   }
@@ -83,6 +88,7 @@ void Format::indentation(std::string source, size_t& indent, bool& iskeyword)
   for(auto pattern: exdenter_patterns) {
     if(std::regex_search(source, std::regex(pattern))) {
       indent--;
+      type = 2;
       return;
     }
   }
@@ -92,6 +98,7 @@ void Format::indentation(std::string source, size_t& indent, bool& iskeyword)
     if(source.find(search) != std::string::npos) {
       indent++;
       iskeyword = true;
+      type = 1;
       return;
     }
   }
@@ -100,6 +107,7 @@ void Format::indentation(std::string source, size_t& indent, bool& iskeyword)
   for(auto search: exdenters) {
     if(source.find(search) != std::string::npos) {
       indent--;
+      type = 2;
       return;
     }
   }
@@ -110,12 +118,17 @@ std::vector<Section> Format::apply(const std::vector<Part>& list)
   std::vector<Section> sections;
   size_t indent = 0;
   bool iskeyword = false;
+  uint8_t type = 0;
   bool inside_block = false;
   bool should_indent = false;
 
   for(auto part: list) {
     Section block = Section(part.id); 
     for(auto token: part.tokens) {
+      if(token.item.size() == 0) {
+        continue;
+      }
+
       std::string lcase;
       std::transform(token.item.begin(), token.item.end(), std::back_inserter(lcase), [](unsigned char c) { return std::tolower(c); }); 
 
@@ -123,7 +136,7 @@ std::vector<Section> Format::apply(const std::vector<Part>& list)
       std::string line = Format::keywords(token.item);
 
       // indentation
-      Format::indentation(lcase, indent, iskeyword);
+      Format::indentation(lcase, indent, iskeyword, type);
       int n = iskeyword ? indent - 1 : indent;
 
       // HANDLE SELECT CASE ... END SELECT
@@ -141,7 +154,7 @@ std::vector<Section> Format::apply(const std::vector<Part>& list)
       }
       // END HANDLE SELECT CASE ... END SELECT
 
-      token.item.insert(token.item.begin(), (n > 0 ? n : 0) * 4, ' ');
+      // token.item.insert(token.item.begin(), (n > 0 ? n : 0) * 4, ' ');
       
       // HANDLE SELECT CASE ... END SELECT
       if(inside_block && lcase.starts_with("case")) {
@@ -153,6 +166,7 @@ std::vector<Section> Format::apply(const std::vector<Part>& list)
 
       block.lines.push_back(token.item);
       block.indents.push_back(n);
+      block.types.push_back(type);
     }
     sections.push_back(block);
   }

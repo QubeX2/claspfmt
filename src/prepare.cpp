@@ -5,6 +5,7 @@
 #include <sstream>
 #include <cstdio>
 #include <cstring>
+#include <unistd.h>
 #include "prepare.h"
 #include "uuid.h"
 
@@ -17,7 +18,7 @@
 std::string Prepare::run(const std::string& filename)
 {
   std::ifstream infile(filename);
-  std::ofstream htmlfile(filename + ".html");
+  std::ofstream htmlfile(filename + ".pre.html");
   std::ofstream claffile(filename + ".claf");
 
   if(infile.is_open()) {
@@ -52,10 +53,16 @@ std::string Prepare::run(const std::string& filename)
     claffile.close();
 
     // run prettier
-    std::ostringstream cmd;
-    cmd << "cd $(dirname \"" << filename << "\") && prettier $(basename \"" << filename << ".html\") --write --print-width 250 --no-bracket-spacing --html-whitespace-sensitivity ignore";
-    if(system(cmd.str().c_str()) != 0) {
-      return "";
+    std::array<std::string, 3> cmds = {
+      "cd $(dirname \"" + filename + "\") && prettier $(basename \"" + filename + ".pre.html\") --write --print-width 250 --no-bracket-spacing --html-whitespace-sensitivity ignore",
+      "cd $(dirname " + filename + ") && awk 'NF' $(basename " + filename + ".pre.html)" + " > $(basename " + filename + ".html)",
+      "rm " + filename + ".pre.html",
+    };
+
+    for(auto cmd: cmds) {
+      if(system(cmd.c_str()) != 0) {
+        return "";
+      }
     }
   } else {
     std::cerr << "Error opening file";
