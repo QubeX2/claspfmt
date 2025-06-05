@@ -1,57 +1,68 @@
-#include <cstring>
 #include <fstream>
-#include <regex>
+#include <iostream> 
 #include <string>
 #include <vector>
-#include <iostream>
-#include "tokenizer.h"
-#include "format.h"
+#include <algorithm>
 #include "helpers.h"
+#include "tokenizer.h"
 
-
-std::vector<Part> Tokenizer::parse(const std::string& filename)
+/**
+ *
+ */
+void Tokenizer::parseFile(const std::string &filename)
 {
-  const char* delimiters = "\n";
-  std::ifstream file(filename);
-  std::string line;
-  bool do_parse = false;
-  std::string uuid;
-  Part part;
-  std::vector<Part> list;
+  m_filename = filename;
+  std::ifstream infile(m_filename);
 
-  if(file.is_open()) {
-    while(std::getline(file, line)) {
-      if(line.starts_with("END:")) {
-        do_parse = false;
-        list.push_back(part);
+  if(infile.is_open()) {
+    while(infile.get(m_cur_ch)) {
+      m_cur_token += m_cur_ch;
+      m_next_ch = infile.peek();
+      this->setType();
+      if(std::find(cbegin(m_ends), cend(m_ends), m_cur_type) != cend(m_ends)) {
+        this->addToken();
       }
-      if(do_parse) {
-        StringHelper::trim(line, " \r\n\t");
-
-        char* token = std::strtok(line.data(), delimiters);
-        while(token) {
-          //std::cout << "TOKEN: " << token << std::endl;
-          TokenType type = TokenType::None;
-          if(std::string(token).starts_with("<%=")) {
-            type = TokenType::Value;
-          } else {
-            type = TokenType::KeyWord;
-          }
-          part.tokens.push_back(Token(std::string(token), type));
-          token = std::strtok(nullptr, delimiters);
-        }
-      }
-      
-      if(line.starts_with("START:")) {
-        std::smatch sm;
-        if(std::regex_search(line, sm, std::regex(R"(\{{1}(.*)\}{1})"))) {
-          uuid = sm[1];
-        }
-        part = Part(uuid);
-        do_parse = true;
-      }
-
+      // store last_ch
+      m_last_ch = m_cur_ch;
     }
+    infile.close();
   }
-  return list;
-} 
+  this->printNodes();
+}
+
+/**
+*
+*/
+void Tokenizer::printNodes()
+{
+  for(auto node: m_nodes) {
+    std::cout << "Type: " << (int)node.type << ", Token: {" << node.token << "}" << std::endl;
+  }
+}
+
+/**
+*
+*/
+void Tokenizer::setType()
+{
+  if(m_cur_ch == '<' && m_next_ch == '!') 
+    m_cur_type = TokenType::HtmlComment;
+
+  if(m_cur_ch == '>' && m_last_ch == '-' && m_cur_type == TokenType::HtmlComment) 
+    m_cur_type = TokenType::HtmlCommentEnd;
+
+  if(m_cur_ch == '%' && m_last_ch == '<')
+    m_cur_type = TokenType::AspTagStart;
+}
+
+/**
+*
+*/
+void Tokenizer::addToken()
+{
+  StringHelper::trim(m_cur_token, " \r\n\t");
+  TokenNode node(m_cur_type, m_cur_token);
+  m_nodes.push_back(node);
+  m_cur_token.clear();
+  m_cur_type = TokenType::None;
+}

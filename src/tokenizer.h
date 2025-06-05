@@ -3,33 +3,41 @@
 
 #include <string>
 #include <vector>
+#include <span>
 
-enum class TokenType { None = 0, KeyWord, Value, WhiteSpace };
-
-class Token {
-public:
-  Token(std::string s, TokenType t) {
-    this->item = s;
-    this->type = t;
-  }
-  TokenType type;
-  std::string item;
+enum class TokenType { 
+  None = 0, 
+  HtmlComment,
+  HtmlCommentEnd,
+  AspTagStart,
+  AspTagEnd,
 };
 
-class Part {
+class TokenNode {
 public:
-  Part() {};
-  Part(std::string id) {
-    this->id = id;
-  }
-  std::string id;
-  std::vector<class Token> tokens;
+  TokenType type;
+  std::string token;
 };
 
 class Tokenizer {
-private:
+  const std::array<TokenType, 3> m_ends = { 
+    TokenType::HtmlCommentEnd, TokenType::AspTagStart, 
+    TokenType::AspTagEnd
+  };
+  std::vector<TokenNode> m_nodes;
+  std::string m_filename;
+  std::string m_cur_token;
+  TokenType m_cur_type = TokenType::None;
+  char m_cur_ch = 0;
+  char m_next_ch = 0;
+  char m_last_ch = 0;
+
+  void addToken();
+  void setType();
+  void printNodes();
+
 public:
-  static std::vector<Part> parse(const std::string& filename);
+  void parseFile(const std::string& filename);
 };
 
 #endif

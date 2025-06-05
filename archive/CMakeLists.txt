@@ -8,6 +8,10 @@ project (claspfmt
 )
 add_executable(claspfmt 
   src/main.cpp
+  src/prepare.cpp
   src/tokenizer.cpp
+  src/format.cpp
+  src/writer.cpp
+  src/uuid.cpp
   src/helpers.cpp
 )
