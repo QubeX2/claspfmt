@@ -39,6 +39,7 @@ void Format::indentation(std::string source, size_t& indent, bool& iskeyword, ui
 
   std::vector<std::string> keyword_patterns = {
     R"(^\belse\b([ ]*'.*)?$)",
+    R"(^\belseif\b.+('.*)?$)",
   };
 
   std::vector<std::string> indenter_patterns = { 
@@ -50,12 +51,14 @@ void Format::indentation(std::string source, size_t& indent, bool& iskeyword, ui
     R"(^do while.+('.*)?$)",
     R"(^do until.+('.*)?$)",
     R"(^function.+('.*)?$)",
+    R"(^while.+('.*)?$)",
   };
   std::vector<std::string> exdenter_patterns = {
     R"(^\bnext\b([ ]*'.*)?$)",
     R"(^\bloop\b([ ]*'.*)?$)",
     R"(^loop while.+('.*)?)",
     R"(^loop until.+('.*)?)",
+    R"(^\bwend\b([ ]*'.*)?$)",
   };
   std::vector<std::string> indenters = {};
   std::vector<std::string> exdenters = { 

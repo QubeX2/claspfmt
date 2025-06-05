@@ -1,4 +1,6 @@
+#include <algorithm>
 #include <cstddef>
+#include <cstdio>
 #include <iostream>
 #include <fstream>
 #include <optional>
@@ -64,6 +66,8 @@ std::string Prepare::run(const std::string& filename)
         return "";
       }
     }
+
+    std::remove(std::string(filename + ".pre.html").c_str());
   } else {
     std::cerr << "Error opening file";
     return "";

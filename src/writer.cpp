@@ -3,13 +3,21 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <filesystem>
+#include <cstdio>
 #include "writer.h"
 #include "helpers.h"
 
 void Writer::put(std::vector<Section> sections, std::string filename)
 {
-  std::ifstream htmlfile(filename + ".html");
-  std::ofstream outfile(filename + ".tmp.asp");
+  std::filesystem::path file(filename);
+  std::string filepath_html = filename + ".html";
+  std::string filepath_out = file.parent_path().string().size() 
+      ? file.parent_path().string()  + "/" + file.stem().string() + ".out.asp" 
+      : file.stem().string() + ".out.asp";
+
+  std::ifstream htmlfile(filepath_html);
+  std::ofstream outfile(filepath_out);
 
   if(htmlfile.is_open()) {
     std::string line;
@@ -24,18 +32,14 @@ void Writer::put(std::vector<Section> sections, std::string filename)
             std::string content;
             size_t cur_indent = 0;
             for(size_t index = 0; auto secl: section.lines) {
-              // std::cout << "SECL: >>" << secl << "<<" << fpos << std::endl;
-              size_t indent = section.indents[index];
-              // std::string newline = section.types[index] == 0 ? "" : "\n";
-              std::string newline = section.lines.size() == 1 ? "" : "\n";
-
-              if(section.types[index] != 0) {
-                secl.insert(secl.begin(), indent * 4, ' ');
-              }
-
               StringHelper::trim(secl, " ");
               if(secl.size()) {
-                content.append(secl + newline);
+                content.append(
+                  "{S:" + std::to_string(secl.size()) + "}" +
+                  "{I:" + std::to_string(section.indents[index]) + "}" +
+                  "{T:" + std::to_string(section.types[index]) + "}" +
+                  secl
+                );
               }
             }
             line.insert(fpos, content);
@@ -43,12 +47,13 @@ void Writer::put(std::vector<Section> sections, std::string filename)
         }
         fpos = line.find("CLASPFMT", fpos + 1);
       }
-      // std::cout << line << "\n";
       outfile << line << "\n";
     }
 
     htmlfile.close();
     outfile.close();
+    std::remove(std::string(filename + ".claf").c_str());
+    std::remove(std::string(filename + ".html").c_str());
   }
   
 }
