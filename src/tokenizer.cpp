@@ -1,6 +1,7 @@
 #include <cstring>
 #include <fstream>
 #include <regex>
+#include <string>
 #include <vector>
 #include <iostream>
 #include "tokenizer.h"
@@ -24,13 +25,19 @@ std::vector<Part> Tokenizer::parse(const std::string& filename)
         do_parse = false;
         list.push_back(part);
       }
-
       if(do_parse) {
         StringHelper::trim(line, " \r\n\t");
 
         char* token = std::strtok(line.data(), delimiters);
         while(token) {
-          part.tokens.push_back(Token(std::string(token), TokenType::KeyWord));
+          //std::cout << "TOKEN: " << token << std::endl;
+          TokenType type = TokenType::None;
+          if(std::string(token).starts_with("<%=")) {
+            type = TokenType::Value;
+          } else {
+            type = TokenType::KeyWord;
+          }
+          part.tokens.push_back(Token(std::string(token), type));
           token = std::strtok(nullptr, delimiters);
         }
       }

@@ -26,7 +26,7 @@ void Writer::put(std::vector<Section> sections, std::string filename)
       size_t fpos = line.find("CLASPFMT", 0);
       while(fpos != std::string::npos) {
         std::string id = line.substr(fpos + 9, 36);
-        line.replace(fpos, 46, "");
+        //line.replace(fpos, 46, "");
         for(auto section: sections) {
           if(id == section.id) {
             std::string content;
@@ -34,15 +34,10 @@ void Writer::put(std::vector<Section> sections, std::string filename)
             for(size_t index = 0; auto secl: section.lines) {
               StringHelper::trim(secl, " ");
               if(secl.size()) {
-                content.append(
-                  "{S:" + std::to_string(secl.size()) + "}" +
-                  "{I:" + std::to_string(section.indents[index]) + "}" +
-                  "{T:" + std::to_string(section.types[index]) + "}" +
-                  secl
-                );
+                content.append(secl);
               }
             }
-            line.insert(fpos, content);
+            //line.insert(fpos, content);
           }
         }
         fpos = line.find("CLASPFMT", fpos + 1);

@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-enum class TokenType { KeyWord = 1, WhiteSpace };
+enum class TokenType { None = 0, KeyWord, Value, WhiteSpace };
 
 class Token {
 public:
