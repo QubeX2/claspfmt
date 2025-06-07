@@ -3,17 +3,46 @@
 #include "tokenizer.h"
 #include <algorithm>
 #include <functional>
+#include <memory>
 #include <vector>
+
+AstTree::AstTree(token_list_t tokens)
+{
+  m_tokens = tokens;
+  m_tree = std::make_unique<AstNode>();
+  m_tree->value = "root";
+}
+
+ast_node_t AstTree::add_node(ast_node_t parent, std::string value, AstType type, AstValueType value_type, AstLang lang)
+{
+  auto an = std::make_shared<AstNode>();
+  an->parent = parent;
+  an->lang = lang;
+  an->type = type;
+  an->value_type = value_type;
+  an->value = value;
+  parent->children.push_back(an);
+  return an;
+}
+
 
 void AstTree::parse()
 {
   std::string cur_str;
   TokenListItem result;
 
+  this->add_node(m_tree, "A");
+  this->add_node(m_tree, "B");
+
+  for(auto t: m_tree->children) {
+    std::cout << std::format("Value: {}, Parent.Value: {}\n", t->value, t->parent->value);
+  }
+
+  /*
   for(uint index = 0; index < m_tokens.size(); index++) {
     cur_str = m_tokens[index].value;
     std::cout << cur_str << std::endl;
-    
+
     //next_str = m_tokens[std::clamp((uint)(index + 1), (uint)0, (uint)(m_tokens.size() - 1))].token;
 
     if(cur_str == "<") {
@@ -24,7 +53,8 @@ void AstTree::parse()
       }
     }
   }
-  
+  */
+
 }
 
 

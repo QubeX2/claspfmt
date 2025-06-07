@@ -3,6 +3,7 @@
 
 #include "tokenizer.h"
 #include <iterator>
+#include <memory>
 #include <sys/types.h>
 #include <vector>
 
@@ -28,28 +29,33 @@ enum class AstValueType {
   Number,
 };
 
+struct AstNode;
 
-class AstNode;
+using ast_node_t = std::shared_ptr<AstNode>;
+using ast_node_w = std::weak_ptr<AstNode>;
+using ast_node_list_t = std::vector<ast_node_t>;
 
-using ast_list_t = std::vector<AstNode>;
-
-class AstNode {
-  ast_list_t children;
+struct AstNode {
+  ast_node_list_t children;
+  ast_node_t parent;
   AstLang lang;
   AstType type;
   std::string value;
-  AstValueType valueType;
-  
+  AstValueType value_type;
 };
+
 
 
 class AstTree {
   token_list_t m_tokens;
-  AstNode m_tree;
+  ast_node_t m_tree;
 
-  void add_node(AstNode& parent);
+  ast_node_t add_node(ast_node_t parent, std::string value = "", 
+                      AstType type = AstType::None,
+                      AstValueType value_type = AstValueType::None,
+                      AstLang lang = AstLang::None);
 public:
-  AstTree(token_list_t tokens) : m_tokens{tokens} {};
+  AstTree(token_list_t tokens);
   void parse();
   void print_tree();
 };
