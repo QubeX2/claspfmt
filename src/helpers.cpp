@@ -1,6 +1,8 @@
 #include <cctype>
 #include <algorithm>
+#include <iostream>
 #include <iterator>
+#include <string>
 #include "helpers.h"
 
 /**
@@ -44,5 +46,62 @@ std::string StringHelper::ucfirst(std::string& str)
     nstr[0] = std::toupper(str[0]);
   }
   return nstr;
+}
+
+
+/**
+*
+*/
+std::pair<std::string, uint> TokenHelper::concat(const std::vector<TokenNode>& tokens, int start, int length)
+{
+  std::string result;
+  uint i = 0;
+  if(start >= 0 && start < tokens.size() && length >= 0 && (length + start) < tokens.size()) {
+    for(i = start; i < (start + length); i++) {
+      result += tokens[i].token;
+    }
+  }
+  return { result, (i - start + 1) };
+}
+
+/**
+*
+*/
+std::pair<std::string, uint> TokenHelper::until_string(const std::vector<TokenNode>& tokens, int start, std::string end, bool include_end)
+{
+  std::string result;
+  uint i = 0;
+  if(start > 0 && start < tokens.size()) {
+    for(i = start; i < tokens.size(); i++) {
+      if(TokenHelper::concat(tokens, i, end.size()).first == end) {
+        if(include_end) {
+          result += end;
+        }
+        return { result, (i - start + 1) };
+      }
+      result += tokens[i].token;
+    }
+  }
+  return { result, 0 };
+}
+
+/**
+*
+*/
+std::pair<std::string, uint> TokenHelper::until_char(const std::vector<TokenNode>& tokens, int start, std::function<int(int)>& comp)
+{
+  std::string result;
+  uint i = 0;
+  if(start > 0 && start < tokens.size()) {
+    for(uint i = start; i < tokens.size(); i++) {
+      if(comp(tokens[i].token[0])) {
+        return { result, (i - start + 1) };
+      } else {
+        result += tokens[i].token;
+      }
+    }
+  }
+  return { result, 0 };
+
 }
 

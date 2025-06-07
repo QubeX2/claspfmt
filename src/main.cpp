@@ -1,9 +1,14 @@
 #include <iostream>
 #include "tokenizer.h"
+#include "ast.h"
 
 int main(int argc, char *argv[]) 
 {
   Tokenizer tnz;
-  tnz.parseFile(std::string(argv[1]));
+  auto tokens = tnz.tokenize(std::string(argv[1]));
+
+  AstTree at(tokens);
+  at.parse();
+
   return 0;
 }
