@@ -19,9 +19,19 @@ enum class TokenType : uint8_t {
 
 class TokenNode {
 public:
-  TokenType type;
-  std::string token;
+  TokenType type = TokenType::None;
+  std::string value = "";
 };
+
+class TokenListItem {
+public:
+  bool isEmpty() { return index == 0 && value == "" && token.type == TokenType::None && token.value == ""; };
+  TokenNode token;
+  std::string value = "";
+  uint index = 0;
+};
+
+using token_list_t = std::vector<TokenNode>;
 
 class Tokenizer {
   /*
@@ -39,16 +49,16 @@ class Tokenizer {
     "response", "request", // 15
   }; */
 
-  std::vector<TokenNode> m_tokens;
+  token_list_t m_tokens;
   std::string m_filename;
   std::string m_cur_token;
   char m_cur_ch = 0;
 
-  void addToken(TokenType type);
-  void printTokens();
+  void add_token(TokenType type);
+  void print_tokens();
 
 public:
-  std::vector<TokenNode> tokenize(const std::string& filename);
+  token_list_t tokenize(const std::string& filename);
 };
 
 #endif

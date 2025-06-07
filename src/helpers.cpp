@@ -2,8 +2,10 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
+#include <regex>
 #include <string>
 #include "helpers.h"
+#include "tokenizer.h"
 
 /**
  *
@@ -17,7 +19,7 @@ void StringHelper::trim(std::string& str, std::string chars)
 /**
 *
 */
-bool StringHelper::isAnyOf(const char& ch, const std::string& chars)
+bool StringHelper::is_anyof(const char& ch, const std::string& chars)
 {
   return std::any_of(
     std::cbegin(chars),
@@ -52,56 +54,105 @@ std::string StringHelper::ucfirst(std::string& str)
 /**
 *
 */
-std::pair<std::string, uint> TokenHelper::concat(const std::vector<TokenNode>& tokens, int start, int length)
+TokenListItem TokenHelper::concat_string(const token_list_t& tokens, uint start, uint length)
 {
   std::string result;
   uint i = 0;
   if(start >= 0 && start < tokens.size() && length >= 0 && (length + start) < tokens.size()) {
     for(i = start; i < (start + length); i++) {
-      result += tokens[i].token;
+      result += tokens[i].value;
     }
   }
-  return { result, (i - start + 1) };
+  return { .value = result, .index = (i - start + 1) };
 }
 
 /**
 *
 */
-std::pair<std::string, uint> TokenHelper::until_string(const std::vector<TokenNode>& tokens, int start, std::string end, bool include_end)
+TokenListItem TokenHelper::until_string(const token_list_t& tokens, uint start, std::string end)
 {
   std::string result;
   uint i = 0;
   if(start > 0 && start < tokens.size()) {
     for(i = start; i < tokens.size(); i++) {
-      if(TokenHelper::concat(tokens, i, end.size()).first == end) {
-        if(include_end) {
-          result += end;
-        }
-        return { result, (i - start + 1) };
+      if(TokenHelper::concat_string(tokens, i, end.size()).value == end) {
+        return { .value = result, .index = (i - start + 1) };
       }
-      result += tokens[i].token;
+      result += tokens[i].value;
     }
   }
-  return { result, 0 };
+  return { .value = "", .index = 0 };
 }
 
 /**
 *
 */
-std::pair<std::string, uint> TokenHelper::until_char(const std::vector<TokenNode>& tokens, int start, std::function<int(int)>& comp)
+TokenListItem TokenHelper::until_first_char_is(const token_list_t& tokens, uint start, std::function<int(int)>& comp)
 {
   std::string result;
   uint i = 0;
   if(start > 0 && start < tokens.size()) {
     for(uint i = start; i < tokens.size(); i++) {
-      if(comp(tokens[i].token[0])) {
-        return { result, (i - start + 1) };
+      if(comp(tokens[i].value[0])) {
+        return { .value = result, .index = (i - start + 1) };
       } else {
-        result += tokens[i].token;
+        result += tokens[i].value;
       }
     }
   }
-  return { result, 0 };
+  return { .value = "", .index = 0 };
 
+}
+
+/**
+*
+*/
+TokenListItem TokenHelper::until_regex(const token_list_t& tokens, uint start, uint length, std::string pattern)
+{
+  std::string result;
+  uint i = 0;
+  if(start >= 0 && start < tokens.size() && length >= 0 && (length + start) < tokens.size()) {
+    for(i = start; i < tokens.size(); i++) {
+      if(std::regex_search(TokenHelper::concat_string(tokens, i, length).value, std::regex(pattern))) {
+        return { .value = result, .index = (i - start + 1) };
+      }
+      result += tokens[i].value;
+    }
+  }
+  return { .value = "", .index = 0 };
+}
+
+/**
+*
+*/
+TokenListItem TokenHelper::find_first(const token_list_t& tokens, uint start, uint length, std::string search)
+{
+  uint i = 0;
+  if(start >= 0 && start < tokens.size() && length >= 0 && (length + start) < tokens.size()) {
+    for(i = start; i < tokens.size(); i++) {
+      if(TokenHelper::concat_string(tokens, i, length).value == search) {
+        TokenNode tn = tokens[i];
+        return { .token = tn, .value = tn.value, .index = (i - start + 1) };
+      }
+    }
+  }
+  return { .value = "", .index = 0 };
+}
+
+/**
+*
+*/
+TokenListItem TokenHelper::find_first_regex(const token_list_t& tokens, uint start, uint length, std::string pattern)
+{
+  uint i = 0;
+  if(start >= 0 && start < tokens.size() && length >= 0 && (length + start) < tokens.size()) {
+    for(i = start; i < tokens.size(); i++) {
+      if(std::regex_search(TokenHelper::concat_string(tokens, i, length).value, std::regex(pattern))) {
+        TokenNode tn = tokens[i];
+        return { .token = tn, .value = tn.value, .index = (i - start + 1) };
+      }
+    }
+  }
+  return { .value = "", .index = 0 };
 }
 

@@ -12,7 +12,7 @@
 /**
  *
  */
-std::vector<TokenNode> Tokenizer::tokenize(const std::string &filename)
+token_list_t Tokenizer::tokenize(const std::string &filename)
 {
   m_filename = filename;
   std::ifstream infile(m_filename);
@@ -24,10 +24,10 @@ std::vector<TokenNode> Tokenizer::tokenize(const std::string &filename)
         m_cur_token += m_cur_ch;
       } else { 
         if(m_cur_token.size()) {
-          this->addToken(TokenType::Symbol);
+          this->add_token(TokenType::Symbol);
         }
         m_cur_token += m_cur_ch;
-        this->addToken(std::isspace(m_cur_ch) ? TokenType::Whitespace : TokenType::Token);
+        this->add_token(std::isspace(m_cur_ch) ? TokenType::Whitespace : TokenType::Token);
       } 
     }
     infile.close();
@@ -39,19 +39,19 @@ std::vector<TokenNode> Tokenizer::tokenize(const std::string &filename)
 /**
 *
 */
-void Tokenizer::printTokens()
+void Tokenizer::print_tokens()
 {
   for(auto node: m_tokens) {
-    std::cout << std::format("Type: [{}], Token: |{}|, Int: |{}|\n", (uint8_t)node.type, node.token, (int)node.token[0]);
+    std::cout << std::format("Type: [{}], Token: |{}|\n", (uint8_t)node.type, node.value);
   }
 }
 
 /**
 *
 */
-void Tokenizer::addToken(TokenType type)
+void Tokenizer::add_token(TokenType type)
 {
-  m_tokens.push_back(TokenNode({ .type = type, .token = m_cur_token }));
+  m_tokens.push_back(TokenNode({ .type = type, .value = m_cur_token }));
   m_cur_token.clear();
 }
 
