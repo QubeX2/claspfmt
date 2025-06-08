@@ -16,8 +16,10 @@ namespace mikandr::string {
 namespace mikandr::token {
   TokenListItem concat_string(const token_list_t& tokens, uint start, uint length);
   TokenListItem until_string(const token_list_t& tokens, uint start, std::string end, bool include = false);
-  TokenListItem until_first_char_is(const token_list_t& tokens, uint start, std::function<int(int)>& comp);
+  TokenListItem until_char(const token_list_t& tokens, uint start, char ch);
+  TokenListItem until_char_is(const token_list_t& tokens, uint start, std::function<int(int)>& comp);
   TokenListItem until_regex(const token_list_t& tokens, uint start, uint length, std::string pattern);
+  TokenListItem until_type(const token_list_t& tokens, uint start, TokenType type);
   TokenListItem find_first(const token_list_t& tokens, uint start, uint length, std::string search);
   TokenListItem find_first_regex(const token_list_t& tokens, uint start, uint length, std::string pattern);
 }

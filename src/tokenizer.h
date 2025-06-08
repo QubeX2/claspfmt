@@ -16,9 +16,26 @@ enum class TokenType : uint8_t {
   None = 0, 
   Whitespace,
   Token,
-  Symbol,
+  Atom,   // alpha
+  Symbol, // alpha num
+  Number, // number
   Value,
+  AspTagStart,
+  AspTagEnd,
+  AspComment,
+  AspVariable,
   HtmlComment,
+  HtmlColor,
+  HtmlTagStart,
+  HtmlTagEnd,
+  HtmlAttribute,
+};
+
+enum class WaitingFor : uint8_t {
+  None = 0,
+  HtmlTagStartClose, // >
+  HtmlAttributeEnd, // " or '
+  ParenStart,       // (
 };
 
 class TokenNode {

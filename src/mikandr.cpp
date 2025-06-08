@@ -115,14 +115,34 @@ TokenListItem mikandr::token::until_string(const token_list_t& tokens, uint star
 /**
 *
 */
-TokenListItem mikandr::token::until_first_char_is(const token_list_t& tokens, uint start, std::function<int(int)>& comp)
+TokenListItem mikandr::token::until_char(const token_list_t& tokens, uint start, char ch)
 {
   std::string result;
   uint i = 0;
   if(start > 0 && start < tokens.size()) {
     for(uint i = start; i < tokens.size(); i++) {
       std::string s = mikandr::variant::to_string(tokens[i].value);
-      if(s.length() && comp(s[0])) {
+      if(s.find(ch) != std::string::npos) {
+        return { .string_value = result, .index = (i - start + 1) };
+      } else {
+        result += s;
+      } 
+    }
+  }
+  return { .string_value = "", .index = 0 };
+}
+
+/**
+*
+*/
+TokenListItem mikandr::token::until_char_is(const token_list_t& tokens, uint start, std::function<int(int)>& comp)
+{
+  std::string result;
+  uint i = 0;
+  if(start > 0 && start < tokens.size()) {
+    for(uint i = start; i < tokens.size(); i++) {
+      std::string s = mikandr::variant::to_string(tokens[i].value);
+      if(std::any_of(s.begin(), s.end(), [&](unsigned char ch) { return(comp(ch)); })) {
         return { .string_value = result, .index = (i - start + 1) };
       } else {
         result += s;
@@ -146,6 +166,22 @@ TokenListItem mikandr::token::until_regex(const token_list_t& tokens, uint start
         return { .string_value = result, .index = (i - start + 1) };
       }
       mikandr::variant::append_to(result, tokens[i].value);
+    }
+  }
+  return { .string_value = "", .index = 0 };
+}
+
+TokenListItem mikandr::token::until_type(const token_list_t& tokens, uint start, TokenType type)
+{
+  std::string result;
+  uint i = 0;
+  if(start >= 0 && start < tokens.size()) {
+    for(i = start; i < tokens.size(); i++) {
+      TokenNode tn = tokens[i];
+      if(tn.type == type) {
+        return { .string_value = result, .index = (i - start + 1) };
+      }
+      mikandr::variant::append_to(result, tn.value);
     }
   }
   return { .string_value = "", .index = 0 };

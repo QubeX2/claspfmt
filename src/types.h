@@ -5,6 +5,13 @@
 #include <string>
 #include <vector>
 
+enum class Lang {
+  None = 0,
+  Html,
+  JavaScript,
+  Asp,
+};
+
 class TokenNode;
 struct AstNode;
 
