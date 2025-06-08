@@ -10,5 +10,5 @@ add_executable(claspfmt
   src/main.cpp
   src/tokenizer.cpp
   src/ast.cpp
-  src/helpers.cpp
+  src/mikandr.cpp
 )

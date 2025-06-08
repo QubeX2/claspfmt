@@ -2,6 +2,7 @@
 #define AST_H
 
 #include "tokenizer.h"
+#include "types.h"
 #include <iterator>
 #include <memory>
 #include <sys/types.h>
@@ -29,18 +30,12 @@ enum class AstValueType {
   Number,
 };
 
-struct AstNode;
-
-using ast_node_t = std::shared_ptr<AstNode>;
-using ast_node_w = std::weak_ptr<AstNode>;
-using ast_node_list_t = std::vector<ast_node_t>;
-
 struct AstNode {
   ast_node_list_t children;
   ast_node_t parent;
   AstLang lang;
   AstType type;
-  std::string value;
+  value_t value;
   AstValueType value_type;
 };
 
@@ -50,7 +45,7 @@ class AstTree {
   token_list_t m_tokens;
   ast_node_t m_tree;
 
-  ast_node_t add_node(ast_node_t parent, std::string value = "", 
+  ast_node_t add_node(ast_node_t parent, value_t value = "", 
                       AstType type = AstType::None,
                       AstValueType value_type = AstValueType::None,
                       AstLang lang = AstLang::None);

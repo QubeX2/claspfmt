@@ -9,29 +9,32 @@
 #include <vector>
 #include <span>
 #include <iostream>
+#include <variant>
+#include "types.h"
 
 enum class TokenType : uint8_t { 
   None = 0, 
   Whitespace,
   Token,
   Symbol,
+  Value,
+  HtmlComment,
 };
 
 class TokenNode {
 public:
+  std::string to_string_value() const;
   TokenType type = TokenType::None;
-  std::string value = "";
+  value_t value;
 };
 
 class TokenListItem {
 public:
-  bool isEmpty() { return index == 0 && value == "" && token.type == TokenType::None && token.value == ""; };
+  bool isEmpty() { return index == 0 && string_value == "" && token.type == TokenType::None; };
   TokenNode token;
-  std::string value = "";
+  std::string string_value = "";
   uint index = 0;
 };
-
-using token_list_t = std::vector<TokenNode>;
 
 class Tokenizer {
   /*
@@ -49,13 +52,13 @@ class Tokenizer {
     "response", "request", // 15
   }; */
 
-  token_list_t m_tokens;
+  token_list_t m_pass1_tokens;
+  token_list_t m_pass2_tokens;
   std::string m_filename;
-  std::string m_cur_token;
-  char m_cur_ch = 0;
 
-  void add_token(TokenType type);
-  void print_tokens();
+  void add_token(token_list_t& tokens, TokenType type, std::string value);
+  void print_tokens(token_list_t& tokens);
+  void pass2();
 
 public:
   token_list_t tokenize(const std::string& filename);

@@ -1,6 +1,7 @@
 #include <iostream>
 #include "tokenizer.h"
 #include "ast.h"
+#include "types.h"
 
 int main(int argc, char *argv[]) 
 {
@@ -8,7 +9,7 @@ int main(int argc, char *argv[])
   auto tokens = tnz.tokenize(std::string(argv[1]));
 
   AstTree at(tokens);
-  at.parse();
+  //at.parse();
 
   return 0;
 }
