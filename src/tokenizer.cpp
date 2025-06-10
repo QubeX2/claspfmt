@@ -8,7 +8,7 @@
 #include <sys/wait.h>
 #include <vector>
 #include <algorithm>
-#include "mikandr.h"
+#include "mylib.h"
 #include "types.h"
 #include "tokenizer.h"
 
@@ -17,7 +17,7 @@
  */
 std::string TokenNode::to_string_value() const
 {
-  return mikandr::variant::to_string(this->value);
+  return mylib::variant::to_string(this->value);
 }
 
 /**
@@ -57,7 +57,7 @@ void Tokenizer::pass2()
       next2_str = next2_token.to_string_value();
     }
 
-    cur_str = mikandr::variant::to_string(cur_token.value);
+    cur_str = mylib::variant::to_string(cur_token.value);
 
     // HtmlTagClose
     if(cur_str == ">" && waiting_for == WaitingFor::HtmlTagStartClose) {
@@ -72,7 +72,7 @@ void Tokenizer::pass2()
     if(cur_token.type == TokenType::Atom && next_str == "=" && next2_str == "\"" 
       && waiting_for == WaitingFor::HtmlTagStartClose) 
     {
-      auto tli_rest = mikandr::token::until_char(m_pass1_tokens, index + 3, '"');
+      auto tli_rest = mylib::token::until_char(m_pass1_tokens, index + 3, '"');
       // std::cout << std::format("Rest: {}\n", tli_rest.string_value);
       index += tli_rest.index + 2;
       this->add_token(m_pass2_tokens, TokenType::HtmlAttribute, cur_str + "=\"" + tli_rest.string_value + "\"");
@@ -96,9 +96,9 @@ void Tokenizer::pass2()
     // <
     if(cur_str == "<") {
       // HtmlComment
-      if((res_str = mikandr::token::concat_string(m_pass1_tokens, index, 4).string_value) == "<!--") {
+      if((res_str = mylib::token::concat_string(m_pass1_tokens, index, 4).string_value) == "<!--") {
         cur_lang = Lang::Html;
-        auto tli_rest = mikandr::token::until_string(m_pass1_tokens, index + 4, "-->", true);
+        auto tli_rest = mylib::token::until_string(m_pass1_tokens, index + 4, "-->", true);
         index += tli_rest.index + 5;
         res_str += tli_rest.string_value;
         this->add_token(m_pass2_tokens, TokenType::HtmlComment, res_str);
@@ -118,7 +118,7 @@ void Tokenizer::pass2()
       }
 
       // AspTagStart
-      if((res_str = mikandr::token::concat_string(m_pass1_tokens, index, 2).string_value) == "<%") {
+      if((res_str = mylib::token::concat_string(m_pass1_tokens, index, 2).string_value) == "<%") {
         index += 2;
         cur_lang = Lang::Asp;
         this->add_token(m_pass2_tokens, TokenType::AspTagStart, "<%");
@@ -128,7 +128,7 @@ void Tokenizer::pass2()
 
     // AspTagEnd
     if(cur_str == "%") {
-      if((res_str = mikandr::token::concat_string(m_pass1_tokens, index, 2).string_value) == "%>") {
+      if((res_str = mylib::token::concat_string(m_pass1_tokens, index, 2).string_value) == "%>") {
         index += 2;
         cur_lang = Lang::None;
         this->add_token(m_pass2_tokens, TokenType::AspTagEnd, "%>");
@@ -138,7 +138,7 @@ void Tokenizer::pass2()
 
     // AspComment
     if(cur_str == "'" && cur_lang == Lang::Asp) {
-      auto tli_rest = mikandr::token::until_char(m_pass1_tokens, index + 1, 10);
+      auto tli_rest = mylib::token::until_char(m_pass1_tokens, index + 1, 10);
       index += tli_rest.index;
       this->add_token(m_pass2_tokens, TokenType::AspComment, "'" + tli_rest.string_value);
       added_token = true;
@@ -158,7 +158,6 @@ void Tokenizer::pass2()
       m_pass2_tokens.push_back(cur_token);
     }
   }
-  this->print_tokens(m_pass2_tokens);
 
 }
 
@@ -196,7 +195,7 @@ token_list_t Tokenizer::tokenize(const std::string &filename)
     infile.close();
   }
   this->pass2();
-  this->print_tokens(m_pass2_tokens);
+  // this->print_tokens(m_pass2_tokens);
   return m_pass2_tokens;
 }
 

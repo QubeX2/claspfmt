@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
   auto tokens = tnz.tokenize(std::string(argv[1]));
 
   AstTree at(tokens);
-  //at.parse();
+  at.parse();
 
   return 0;
 }
