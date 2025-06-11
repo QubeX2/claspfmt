@@ -7,6 +7,7 @@
 #include <memory>
 #include <sys/types.h>
 #include <vector>
+#include "mikandr.h"
 
 enum class AstLang {
   None = 0,
@@ -30,9 +31,8 @@ enum class AstValueType {
   Number,
 };
 
-struct AstNode {
-  ast_node_list_t children;
-  ast_node_t parent;
+class AstNode : mikandr::tree::INode {
+public:
   AstLang lang;
   AstType type;
   value_t value;
@@ -45,10 +45,6 @@ class AstTree {
   token_list_t m_tokens;
   ast_node_t m_tree;
 
-  ast_node_t add_node(ast_node_t parent, value_t value = "", 
-                      AstType type = AstType::None,
-                      AstValueType value_type = AstValueType::None,
-                      AstLang lang = AstLang::None);
 public:
   AstTree(token_list_t tokens);
   void parse();

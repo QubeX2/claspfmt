@@ -15,6 +15,7 @@ AstTree::AstTree(token_list_t tokens)
   m_tree->value = "root";
 }
 
+  /*
 ast_node_t AstTree::add_node(ast_node_t parent, value_t value, AstType type, AstValueType value_type, AstLang lang)
 {
   auto an = std::make_shared<AstNode>();
@@ -26,6 +27,7 @@ ast_node_t AstTree::add_node(ast_node_t parent, value_t value, AstType type, Ast
   parent->children.push_back(an);
   return an;
 }
+*/
 
 
 void AstTree::parse()
@@ -33,7 +35,13 @@ void AstTree::parse()
   std::string cur_str;
   TokenListItem result;
 
-  mikandr::treenode<std::shared_ptr<AstNode>> tnode;
+  // mikandr::treenode<std::shared_ptr<AstNode>> tnode;
+
+  ast_node_t node;
+  ast_node_t node2;
+
+  node->add_child(node2);
+  
 
   /*
   this->add_node(m_tree, "A");

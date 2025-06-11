@@ -5,7 +5,7 @@ project (mikandr
 )
 
 set(LIBRARY_OUTPUT_PATH "lib")
-add_library(mikandr SHARED src/mikandr.cpp src/treenode.cpp)
+add_library(mikandr SHARED src/mikandr.cpp src/tree.cpp)
 
 set_target_properties(mikandr 
   PROPERTIES 

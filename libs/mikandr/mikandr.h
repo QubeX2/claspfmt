@@ -3,7 +3,7 @@
 
 #include <functional>
 #include <string>
-#include "src/treenode.h"
+#include "src/tree.h"
 
 namespace mikandr::string {
   void trim(std::string& str, const std::string chars);
